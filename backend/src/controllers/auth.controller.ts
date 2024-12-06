@@ -22,7 +22,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
   }
   if (confirmPassword !== password) {
     res.status(400).json({
-      error: "Passwords do not match.",
+      error: "Confirm password does not match with password.",
       success: false,
       statusCode: 400,
     });
@@ -267,7 +267,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
     // Update last login details
     await User.updateOne(
       { _id: user._id },
-      { lastLoginAt: new Date(), lastLoginIP: req.ip }
+      { lastSignInAt: new Date(), lastSignInIP: req.ip }
     );
 
     // Send response
