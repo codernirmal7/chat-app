@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import validator from "validator"; // To add email and other validations
-import generateText from "../utils/text-generator";
 import argon2 from "argon2";
 
 // Define the interface for the User document
@@ -10,6 +9,9 @@ export interface IUser extends Document {
   email: string;
   password: string;
   avatar: string;
+  verificationToken?: string;
+  verificationTokenExpireTime?: Date;
+  emailVerifiedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -81,6 +83,9 @@ const UserSchema: Schema = new Schema<IUser>(
         message: "Please provide a valid URL for the avatar",
       },
     },
+    verificationToken: { type: String },
+    verificationTokenExpireTime: { type: Date },
+    emailVerifiedAt: { type: Date, default: null },
   },
   {
     timestamps: true,

@@ -1,5 +1,5 @@
 import otpGenerator from "otp-generator";
-const generateText = (
+const generateCode = (
   length: number | string,
   digits: boolean,
   lowerCaseAlphabets: boolean,
@@ -20,4 +20,4 @@ const generateText = (
   return text;
 };
 
-export default generateText;
+export default generateCode;
