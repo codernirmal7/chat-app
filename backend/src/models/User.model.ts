@@ -12,6 +12,8 @@ export interface IUser extends Document {
   verificationToken?: string;
   verificationTokenExpireTime?: Date;
   emailVerifiedAt: Date;
+  lastSignInAt?: Date;
+  lastSignInIP? : string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +88,8 @@ const UserSchema: Schema = new Schema<IUser>(
     verificationToken: { type: String },
     verificationTokenExpireTime: { type: Date },
     emailVerifiedAt: { type: Date, default: null },
+    lastSignInAt: { type: Date },
+    lastSignInIP: { type: String},
   },
   {
     timestamps: true,

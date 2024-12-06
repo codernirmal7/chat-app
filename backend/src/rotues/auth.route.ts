@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   resendVerificationEmail,
+  signin,
   signup,
   verifyEmail,
 } from "../controllers/auth.controller";
@@ -14,5 +15,6 @@ authRouter.route("/verify-email").post(verifyEmail);
 authRouter
   .route("/resend-verification-email")
   .post(resendVerificationRateLimiter, resendVerificationEmail);
+authRouter.route("/signin").post(signupRateLimiter,signin);
 
 export default authRouter;

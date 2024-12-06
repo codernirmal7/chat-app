@@ -3,6 +3,10 @@ import User from "../models/User.model";
 import generateCode from "../utils/code-generator";
 import { sendVerificationEmail } from "../nodemailer/email.nodermailer";
 import { generateTokenExpireTime } from "../utils/generateTokenExpireTime";
+import argon2 from "argon2";
+import { generateJWT } from "../utils/jwt-helper";
+import "dotenv/config";
+import { escape } from "validator";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   const { fullName, email, password, confirmPassword } = req.body;
@@ -76,9 +80,10 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully. Please check your email for verification.",
+      message:
+        "User Sign Up successfully. Please check your email for verification.",
     });
-  } catch (error : any) {
+  } catch (error: any) {
     res.status(500).json({
       error: error.message,
       success: false,
@@ -87,25 +92,31 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 const verifyEmail = async (req: Request, res: Response): Promise<void> => {
-  const {email , token } = req.body;
+  const { email, token } = req.body;
 
   if (!token) {
-    res.status(400).json({ error: "Verification token is required.", success: false });
+    res
+      .status(400)
+      .json({ error: "Verification token is required.", success: false });
     return;
   }
 
   try {
-
     // Find user by token
-    const user = await User.findOne({email, verificationToken: token });
+    const user = await User.findOne({ email, verificationToken: token });
 
     if (!user) {
-      res.status(400).json({ error: "Invalid or expired code.", success: false });
+      res
+        .status(400)
+        .json({ error: "Invalid or expired code.", success: false });
       return;
     }
 
     // Check if the token is expired
-    if (user.verificationTokenExpireTime && user.verificationTokenExpireTime < new Date()) {
+    if (
+      user.verificationTokenExpireTime &&
+      user.verificationTokenExpireTime < new Date()
+    ) {
       res.status(400).json({
         error: "Verification token has expired. Please request a new one.",
         success: false,
@@ -128,8 +139,10 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-
-const resendVerificationEmail = async (req: Request, res: Response): Promise<void> => {
+const resendVerificationEmail = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { email } = req.body;
 
   try {
@@ -143,7 +156,9 @@ const resendVerificationEmail = async (req: Request, res: Response): Promise<voi
 
     //check if user is already verified
     if (user.emailVerifiedAt) {
-      res.status(400).json({ error: "User is already verified.", success: false });
+      res
+        .status(400)
+        .json({ error: "User is already verified.", success: false });
       return;
     }
 
@@ -167,5 +182,105 @@ const resendVerificationEmail = async (req: Request, res: Response): Promise<voi
   }
 };
 
+const signin = async (req: Request, res: Response): Promise<void> => {
+  const { identifier, password } = req.body;
 
-export { signup , verifyEmail , resendVerificationEmail };
+  // Validate input
+  if (!identifier || !password) {
+    res.status(400).json({
+      error: "All fields are required.",
+      success: false,
+    });
+    return;
+  }
+
+  try {
+    // Sanitize inputs
+    const sanitizedIdentifier = escape(identifier);
+    const sanitizedPassword = escape(password);
+
+    // Find user by email or username
+    const user: any = await User.findOne({
+      $or: [{ email: sanitizedIdentifier }, { username: sanitizedIdentifier }],
+    }).select("+password");
+
+    if (!user) {
+      res.status(401).json({
+        error: "Invalid email/username or password.",
+        success: false,
+      });
+      return;
+    }
+
+    // Compare password
+    const isPasswordValid = await argon2.verify(
+      user.password,
+      sanitizedPassword
+    );
+
+    if (!isPasswordValid) {
+      res.status(401).json({
+        error: "Invalid email/username or password.",
+        success: false,
+      });
+      return;
+    }
+
+    // Check if email is verified
+    if (!user.emailVerifiedAt) {
+
+     // Send verification email
+      const verificationToken = generateCode(6, true, false, true, false);
+      await User.updateOne(
+        { _id: user._id },
+        { verificationToken: verificationToken, verificationTokenExpireTime: generateTokenExpireTime() }
+      );
+      await sendVerificationEmail(user.email, verificationToken);
+
+      res.status(401).json({
+        error:
+          "Please verify your email before logging in. Verification code has been sent.",
+        success: false,
+      });
+
+      return;
+    }
+
+    // Generate JWT
+    const token = generateJWT(
+      user._id,
+      user.fullName,
+      user.email,
+      user.username,
+      user.emailVerifiedAt,
+      user.avatar,
+      user.createdAt
+    );
+
+    res.cookie("accessToken", token, {
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+      secure: process.env.NODE_ENV !== "development", // Set to true in production
+      sameSite: "strict", // Prevent CSRF attacks
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    // Update last login details
+    await User.updateOne(
+      { _id: user._id },
+      { lastLoginAt: new Date(), lastLoginIP: req.ip }
+    );
+
+    // Send response
+    res.status(200).json({
+      success: true,
+      message: "Sign In successful.",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: error.message,
+      success: false,
+    });
+  }
+};
+
+export { signup, verifyEmail, resendVerificationEmail, signin };
