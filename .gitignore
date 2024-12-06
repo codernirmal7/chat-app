@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# TypeScript compiled files
+*.js
+*.js.map
+
+# Environment variable files
+.env
+
+# IDE specific files
+.vscode/
+.idea/
+
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+#dev
+index.html
