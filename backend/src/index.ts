@@ -1,6 +1,6 @@
 import app from "./app";
 import "dotenv/config";
-import connectToDB from "./db/Mongo.db";
+import connectToDB from "./db/mongo.db";
 
 const PORT = process.env.PORT || 5347; // Set 5347 as default when no port is defined
 
