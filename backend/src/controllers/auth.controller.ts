@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User.model";
 import generateCode from "../utils/code-generator";
-import { sendPasswordResetEmail, sendPasswordResetSuccessfulEmail, sendVerificationEmail } from "../nodemailer/email.nodermailer";
+import { sendLoginSuccessfulEmail, sendPasswordResetEmail, sendPasswordResetSuccessfulEmail, sendVerificationEmail, sendWelcomeEmail } from "../nodemailer/email.nodermailer";
 import { generateTokenExpireTime } from "../utils/generateTokenExpireTime";
 import argon2 from "argon2";
 import { generateJWT } from "../utils/jwt-helper";
@@ -132,6 +132,9 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     user.verificationToken = undefined;
     user.verificationTokenExpireTime = undefined;
     await user.save();
+
+    //send welcome email
+    await sendWelcomeEmail(email, user.fullName);
 
     res.status(200).json({
       success: true,
@@ -273,6 +276,14 @@ const signin = async (req: Request, res: Response): Promise<void> => {
       { lastSignInAt: new Date(), lastSignInIP: req.ip }
     );
 
+    //send login successful email
+    await sendLoginSuccessfulEmail(
+      user.email,
+      user.fullName,
+      req.ip as string,
+      req.headers["user-agent"] as string
+    );
+
     // Send response
     res.status(200).json({
       success: true,
@@ -378,7 +389,7 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     );
 
     // Send password reset successful email
-    sendPasswordResetSuccessfulEmail(email)
+    sendPasswordResetSuccessfulEmail(email , user.fullName);
 
     res.status(200).json({
       success: true,
