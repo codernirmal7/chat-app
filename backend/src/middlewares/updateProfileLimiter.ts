@@ -1,9 +1,9 @@
 import rateLimit from "express-rate-limit";
 
 const updateProfileLimiter = rateLimit({
-  keyGenerator: (req) => req.userData.userId, // Use authenticated user's ID as the key
   windowMs: 15 * 60 * 1000,
   max: 10,
+  message: "Too many requests from this IP, please try again later.",
 });
 
 export default updateProfileLimiter

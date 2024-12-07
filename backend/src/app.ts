@@ -16,6 +16,7 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use(express.static("public"));
 
 //routes
 app.use("/api/auth", authRouter)

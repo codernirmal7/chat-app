@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import User from "../models/User.model";
 import generateCode from "../utils/code-generator";
-import { sendLoginSuccessfulEmail, sendPasswordResetEmail, sendPasswordResetSuccessfulEmail, sendVerificationEmail, sendWelcomeEmail } from "../nodemailer/email.nodermailer";
+import {
+  sendLoginSuccessfulEmail,
+  sendPasswordResetEmail,
+  sendPasswordResetSuccessfulEmail,
+  sendVerificationEmail,
+  sendWelcomeEmail,
+} from "../nodemailer/email.nodermailer";
 import { generateTokenExpireTime } from "../utils/generateTokenExpireTime";
 import argon2 from "argon2";
 import { generateJWT } from "../utils/jwt-helper";
@@ -10,6 +16,7 @@ import { escape } from "validator";
 import isPasswordStrong from "../utils/isPasswordStrong";
 import { blacklistToken } from "../utils/handelBlackListJWT";
 import jwt from "jsonwebtoken";
+import regenerateJWTAndSetCookie from "../utils/regenerateJWTAndSetCookie";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   const { fullName, email, password, confirmPassword } = req.body;
@@ -234,12 +241,14 @@ const signin = async (req: Request, res: Response): Promise<void> => {
 
     // Check if email is verified
     if (!user.emailVerifiedAt) {
-
-     // Send verification email
+      // Send verification email
       const verificationToken = generateCode(6, true, false, true, false);
       await User.updateOne(
         { _id: user._id },
-        { verificationToken: verificationToken, verificationTokenExpireTime: generateTokenExpireTime() }
+        {
+          verificationToken: verificationToken,
+          verificationTokenExpireTime: generateTokenExpireTime(),
+        }
       );
       await sendVerificationEmail(user.email, verificationToken);
 
@@ -251,24 +260,8 @@ const signin = async (req: Request, res: Response): Promise<void> => {
 
       return;
     }
-
-    // Generate JWT
-    const token = generateJWT(
-      user._id,
-      user.fullName,
-      user.email,
-      user.username,
-      user.emailVerifiedAt,
-      user.avatar,
-      user.createdAt
-    );
-
-    res.cookie("accessToken", token, {
-      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-      secure: process.env.NODE_ENV === "production", // Set to true in production
-      sameSite: "strict", // Prevent CSRF attacks
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
+    // Generate new JWT and set in cookie
+    regenerateJWTAndSetCookie(res, user);
 
     // Update last login details
     await User.updateOne(
@@ -297,7 +290,10 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+const requestPasswordReset = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { email } = req.body;
 
   //validation
@@ -316,13 +312,12 @@ const requestPasswordReset = async (req: Request, res: Response): Promise<void> 
     }
 
     // Generate a new token and expiration time
-    const resetToken = generateCode(10 , true, false, true, false);
+    const resetToken = generateCode(10, true, false, true, false);
     const resetTokenExpireTime = generateTokenExpireTime();
 
     user.resetPasswordToken = resetToken;
     user.resetPasswordTokenExpireTime = resetTokenExpireTime as Date;
     await user.save();
-
 
     await sendPasswordResetEmail(email, resetToken);
 
@@ -330,14 +325,14 @@ const requestPasswordReset = async (req: Request, res: Response): Promise<void> 
       success: true,
       message: "Password reset email sent.",
     });
-  } catch (error : any) {
+  } catch (error: any) {
     console.error("Error in requestPasswordReset:", error);
     res.status(500).json({ error: error.message, success: false });
   }
 };
 
 const resetPassword = async (req: Request, res: Response): Promise<void> => {
-  const {email, token, newPassword , newConfirmPassword} = req.body;
+  const { email, token, newPassword, newConfirmPassword } = req.body;
 
   // Validation
   if (!token || !newPassword || !newConfirmPassword || !email) {
@@ -345,22 +340,25 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-   // Password validation
-   if (newConfirmPassword !== newPassword) {
+  // Password validation
+  if (newConfirmPassword !== newPassword) {
     res
       .status(400)
-      .json({ error: "Confirm password does not match with password.", success: false });
+      .json({
+        error: "Confirm password does not match with password.",
+        success: false,
+      });
     return;
   }
 
   if (!isPasswordStrong(newPassword)) {
-    res.status(400).json({ 
-      error: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.", 
-      success: false 
+    res.status(400).json({
+      error:
+        "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.",
+      success: false,
     });
     return;
   }
-  
 
   try {
     const user = await User.findOne({
@@ -371,7 +369,9 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 
     //check if user exists
     if (!user) {
-      res.status(400).json({ error: "Invalid or expired token.", success: false });
+      res
+        .status(400)
+        .json({ error: "Invalid or expired token.", success: false });
       return;
     }
 
@@ -389,18 +389,17 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     );
 
     // Send password reset successful email
-    sendPasswordResetSuccessfulEmail(email , user.fullName);
+    sendPasswordResetSuccessfulEmail(email, user.fullName);
 
     res.status(200).json({
       success: true,
       message: "Password reset successful.",
     });
-  } catch (error : any) {
+  } catch (error: any) {
     console.error("Error in resetPassword:", error);
     res.status(500).json({ error: error.message, success: false });
   }
 };
-
 
 const logout = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -410,28 +409,35 @@ const logout = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Decode the token to get its expiry time
+    // Blacklist token
     const decoded = jwt.decode(token) as { exp: number };
-    const currentTime = Math.floor(Date.now() / 1000);
-    const timeToExpire = decoded.exp - currentTime;
-
-    // Add the token to the blacklist
-    await blacklistToken(token, timeToExpire);
+    if (decoded) {
+      const timeToExpire = decoded.exp - Math.floor(Date.now() / 1000);
+      await blacklistToken(token, timeToExpire);
+    }
 
     // Clear the cookie
     res.clearCookie("accessToken", {
       httpOnly: true, //Prevents client-side JavaScript from accessing the cookie
       secure: process.env.NODE_ENV === "production", // Set to true in production
-      sameSite: "strict",//Prevents CSRF attacks
+      sameSite: "strict", //Prevents CSRF attacks
     });
 
-    res.status(200).json({ success: true, message: "Logged out successfully." });
-  } catch (error : any) {
+    res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully." });
+  } catch (error: any) {
     console.error("Logout error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-
-
-export { signup, verifyEmail, resendVerificationEmail, signin , requestPasswordReset , resetPassword , logout};
+export {
+  signup,
+  verifyEmail,
+  resendVerificationEmail,
+  signin,
+  requestPasswordReset,
+  resetPassword,
+  logout,
+};
