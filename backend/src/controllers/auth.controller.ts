@@ -8,6 +8,8 @@ import { generateJWT } from "../utils/jwt-helper";
 import "dotenv/config";
 import { escape } from "validator";
 import isPasswordStrong from "../utils/isPasswordStrong";
+import { blacklistToken } from "../utils/handelBlackListJWT";
+import jwt from "jsonwebtoken";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   const { fullName, email, password, confirmPassword } = req.body;
@@ -260,7 +262,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
 
     res.cookie("accessToken", token, {
       httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-      secure: process.env.NODE_ENV !== "development", // Set to true in production
+      secure: process.env.NODE_ENV === "production", // Set to true in production
       sameSite: "strict", // Prevent CSRF attacks
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -389,5 +391,36 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+const logout = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const token = req.cookies.accessToken; // Retrieve the accessToken from cookies
+    if (!token) {
+      res.status(400).json({ success: false, message: "No token provided." });
+      return;
+    }
 
-export { signup, verifyEmail, resendVerificationEmail, signin , requestPasswordReset , resetPassword };
+    // Decode the token to get its expiry time
+    const decoded = jwt.decode(token) as { exp: number };
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeToExpire = decoded.exp - currentTime;
+
+    // Add the token to the blacklist
+    await blacklistToken(token, timeToExpire);
+
+    // Clear the cookie
+    res.clearCookie("accessToken", {
+      httpOnly: true, //Prevents client-side JavaScript from accessing the cookie
+      secure: process.env.NODE_ENV === "production", // Set to true in production
+      sameSite: "strict",//Prevents CSRF attacks
+    });
+
+    res.status(200).json({ success: true, message: "Logged out successfully." });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ success: false, error: "Internal server error." });
+  }
+};
+
+
+
+export { signup, verifyEmail, resendVerificationEmail, signin , requestPasswordReset , resetPassword , logout};

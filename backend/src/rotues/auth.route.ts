@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  logout,
   requestPasswordReset,
   resendVerificationEmail,
   resetPassword,
@@ -21,5 +22,6 @@ authRouter
 authRouter.route("/signin").post(signupRateLimiter,signin);
 authRouter.post("/request-password-reset",resetPasswordLimiter, requestPasswordReset);
 authRouter.post("/reset-password", resetPassword);
+authRouter.get("/logout", logout);
 
 export default authRouter;
