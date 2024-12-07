@@ -2,11 +2,13 @@
 import { Request } from "express";
 
 interface UserData {
-  id: string;
+  userId: string;
+  fullName: string;
   email: string;
-  lastTimeSignIn: Date;
-  createdAt : Date
-  // Add more fields as per your user model
+  username: string;
+  emailVerifiedAt: Date;
+  avatar: string;
+  accountCreatedAt: Date;
 }
 
 declare global {
