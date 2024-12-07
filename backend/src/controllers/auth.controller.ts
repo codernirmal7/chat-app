@@ -330,9 +330,9 @@ const requestPasswordReset = async (req: Request, res: Response): Promise<void> 
       success: true,
       message: "Password reset email sent.",
     });
-  } catch (error) {
+  } catch (error : any) {
     console.error("Error in requestPasswordReset:", error);
-    res.status(500).json({ error: "Internal server error.", success: false });
+    res.status(500).json({ error: error.message, success: false });
   }
 };
 
@@ -395,9 +395,9 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: "Password reset successful.",
     });
-  } catch (error) {
+  } catch (error : any) {
     console.error("Error in resetPassword:", error);
-    res.status(500).json({ error: "Internal server error.", success: false });
+    res.status(500).json({ error: error.message, success: false });
   }
 };
 
@@ -426,9 +426,9 @@ const logout = async (req: Request, res: Response): Promise<void> => {
     });
 
     res.status(200).json({ success: true, message: "Logged out successfully." });
-  } catch (error) {
+  } catch (error : any) {
     console.error("Logout error:", error);
-    res.status(500).json({ success: false, error: "Internal server error." });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
