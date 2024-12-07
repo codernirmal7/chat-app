@@ -1,7 +1,11 @@
 import Redis from "ioredis";
 
 // Initialize Redis client
-const redisClient = new Redis();
+const redisClient = new Redis({
+    host: process.env.REDIS_HOST, // e.g., 'your-redis-instance.redisprovider.com'
+    port: Number(process.env.REDIS_PORT),
+    password: process.env.REDIS_PASSWORD, // If your Redis provider requires a password
+});
 
 const blacklistToken = async (token: string, expiry: number): Promise<void> => {
   // Store the token with an expiry time
