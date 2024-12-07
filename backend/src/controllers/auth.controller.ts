@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import User from "../models/User.model";
 import generateCode from "../utils/code-generator";
-import { sendVerificationEmail } from "../nodemailer/email.nodermailer";
+import { sendPasswordResetEmail, sendPasswordResetSuccessfulEmail, sendVerificationEmail } from "../nodemailer/email.nodermailer";
 import { generateTokenExpireTime } from "../utils/generateTokenExpireTime";
 import argon2 from "argon2";
 import { generateJWT } from "../utils/jwt-helper";
 import "dotenv/config";
 import { escape } from "validator";
+import isPasswordStrong from "../utils/isPasswordStrong";
 
 const signup = async (req: Request, res: Response): Promise<void> => {
   const { fullName, email, password, confirmPassword } = req.body;
@@ -283,4 +284,110 @@ const signin = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { signup, verifyEmail, resendVerificationEmail, signin };
+const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+  const { email } = req.body;
+
+  //validation
+  if (!email) {
+    res.status(400).json({ error: "Email is required.", success: false });
+    return;
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    //check if user exists
+    if (!user) {
+      res.status(404).json({ error: "User not found.", success: false });
+      return;
+    }
+
+    // Generate a new token and expiration time
+    const resetToken = generateCode(10 , true, false, true, false);
+    const resetTokenExpireTime = generateTokenExpireTime();
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpireTime = resetTokenExpireTime as Date;
+    await user.save();
+
+
+    await sendPasswordResetEmail(email, resetToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset email sent.",
+    });
+  } catch (error) {
+    console.error("Error in requestPasswordReset:", error);
+    res.status(500).json({ error: "Internal server error.", success: false });
+  }
+};
+
+const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  const {email, token, newPassword , newConfirmPassword} = req.body;
+
+  // Validation
+  if (!token || !newPassword || !newConfirmPassword || !email) {
+    res.status(400).json({ error: "All fields are required.", success: false });
+    return;
+  }
+
+   // Password validation
+   if (newConfirmPassword !== newPassword) {
+    res
+      .status(400)
+      .json({ error: "Confirm password does not match with password.", success: false });
+    return;
+  }
+
+  if (!isPasswordStrong(newPassword)) {
+    res.status(400).json({ 
+      error: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.", 
+      success: false 
+    });
+    return;
+  }
+  
+
+  try {
+    const user = await User.findOne({
+      email,
+      resetPasswordToken: token,
+      resetPasswordTokenExpireTime: { $gt: new Date() },
+    });
+
+    //check if user exists
+    if (!user) {
+      res.status(400).json({ error: "Invalid or expired token.", success: false });
+      return;
+    }
+
+    const hashedPassword = await argon2.hash(newPassword, {
+      type: argon2.argon2id, // Use Argon2id for enhanced security
+    });
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        password: hashedPassword,
+        resetPasswordToken: undefined,
+        resetPasswordTokenExpireTime: undefined,
+      }
+    );
+
+    // Send password reset successful email
+    sendPasswordResetSuccessfulEmail(email)
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful.",
+    });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ error: "Internal server error.", success: false });
+  }
+};
+
+
+
+export { signup, verifyEmail, resendVerificationEmail, signin , requestPasswordReset , resetPassword };

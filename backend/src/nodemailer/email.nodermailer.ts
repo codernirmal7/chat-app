@@ -1,4 +1,4 @@
-import { sendVerificationEmailTemplate } from "./emailTemplates.nodemailer";
+import { sendPasswordResetEmailTemplate, sendPasswordResetSuccessfulEmailTemplate, sendVerificationEmailTemplate } from "./emailTemplates.nodemailer";
 import transporter from "./nodemailer.config";
 
 
@@ -22,4 +22,22 @@ export const sendVerificationEmail = async (
   };
 
   await transporter.sendMail(mailOptions);
+};
+
+export const sendPasswordResetEmail = async (email: string, token: string): Promise<void> => {  
+  await transporter.sendMail({
+    from: sender,
+    to: email,
+    subject: "Password Reset Request",
+    html: sendPasswordResetEmailTemplate(token)
+  });
+};
+
+export const sendPasswordResetSuccessfulEmail = async (email: string): Promise<void> => {  
+  await transporter.sendMail({
+    from: sender,
+    to: email,
+    subject: "Password Reset Successful",
+    html: sendPasswordResetSuccessfulEmailTemplate()
+  });
 };

@@ -11,6 +11,8 @@ export interface IUser extends Document {
   avatar: string;
   verificationToken?: string;
   verificationTokenExpireTime?: Date;
+  resetPasswordToken?: string;
+  resetPasswordTokenExpireTime? : Date;
   emailVerifiedAt: Date;
   lastSignInAt?: Date;
   lastSignInIP? : string;
@@ -87,6 +89,8 @@ const UserSchema: Schema = new Schema<IUser>(
     },
     verificationToken: { type: String },
     verificationTokenExpireTime: { type: Date },
+    resetPasswordToken: { type: String},
+    resetPasswordTokenExpireTime: { type: Date },
     emailVerifiedAt: { type: Date, default: null },
     lastSignInAt: { type: Date },
     lastSignInIP: { type: String},
@@ -106,8 +110,8 @@ UserSchema.pre<IUser>("save", async function (next) {
     });
     this.password = hashedPassword;
     next();
-  } catch (error) {
-    console.log(error);
+  } catch (error : any) {
+    next(error);
   }
 });
 
