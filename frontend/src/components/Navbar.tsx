@@ -1,4 +1,3 @@
-import { FiLogOut, FiSettings, FiUser } from "react-icons/fi";
 import { ThemeController } from "./ThemeController";
 
 const Navbar = () => {
