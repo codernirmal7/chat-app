@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import { TbLoader2 } from "react-icons/tb";
 import { CiMail } from "react-icons/ci";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -89,7 +90,7 @@ const Signup = () => {
     try {
       setIsLoading(true);
       const result = await dispatch(signup(formData)).unwrap();
-      alert(result.message || "Signup successful!");
+      toast.success(result.message);
 
       // Reset form and errors after successful signup
       setFormData({
