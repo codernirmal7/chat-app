@@ -71,6 +71,26 @@ export const verifyEmail = createAsyncThunk(
   }
 );
 
+// AsyncThunk for user resend verify email code
+export const resendVerificationCodeEmail = createAsyncThunk(
+  "auth/resend-verification-email",
+  async (
+    {
+      email,
+    }: { email : string; },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/resend-verification-email`, {
+       email,
+      });
+      const {  message } = response.data;
+      return { message };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Error while resending verification code.");
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: "auth",

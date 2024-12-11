@@ -5,7 +5,10 @@ import { TbLoader2 } from "react-icons/tb";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
-import { verifyEmail } from "../redux/slices/authSlice";
+import {
+  resendVerificationCodeEmail,
+  verifyEmail,
+} from "../redux/slices/authSlice";
 import toast from "react-hot-toast";
 
 export const VerifyEmail = () => {
@@ -21,6 +24,8 @@ export const VerifyEmail = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isLoading2, setIsLoading2] = useState(false);
 
   const [formData, setFormData] = useState({
     verificationCode: "",
@@ -67,13 +72,9 @@ export const VerifyEmail = () => {
           token: formData.verificationCode,
         })
       ).unwrap();
-
-      //show message if success
-
       toast.success(result.message);
 
       // if success then navigate to login page and reset form
-      setResponseMessage({ errors: false, message: result.message });
       setIsLoading(false);
 
       setFormData({
@@ -83,8 +84,31 @@ export const VerifyEmail = () => {
       setTimeout(() => {
         navigate("/signin", { replace: true });
       }, 1000);
-    } catch (error : any) {
+    } catch (error: any) {
       setIsLoading(false);
+      setResponseMessage({
+        errors: true,
+        message: error,
+      });
+    }
+  };
+
+  const handleResendVerificationCode = async () => {
+    setResponseMessage({ errors: false, message: "" });
+    try {
+      setIsLoading2(true);
+      // send verification code to backend
+      const result = await dispatch(
+        resendVerificationCodeEmail({
+          email: email as string,
+        })
+      ).unwrap();
+
+      toast.success(result.message);
+
+      setIsLoading2(false);
+    } catch (error: any) {
+      setIsLoading2(false);
       setResponseMessage({
         errors: true,
         message: error,
@@ -112,12 +136,12 @@ export const VerifyEmail = () => {
                 </p>
               </div>
               {responseMessage.errors && (
-              <div className="w-full flex items-center justify-center text-center mt-4">
-                <span className="w-full text-error border border-error/30 rounded-lg p-5">
-                  {responseMessage.message}
-                </span>
-              </div>
-            )}
+                <div className="w-full flex items-center justify-center text-center mt-4">
+                  <span className="w-full text-error border border-error/30 rounded-lg p-5">
+                    {responseMessage.message}
+                  </span>
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4 mt-5">
                 {/* verificationCode */}
                 <div className="form-control">
@@ -162,6 +186,22 @@ export const VerifyEmail = () => {
                 </button>
               </form>
             </div>
+          </div>
+
+          <div className="text-center ">
+            <p className="text-base-content/60 flex gap-2 items-center">
+              Request a new code?{" "}
+              {isLoading2 ? (
+                <TbLoader2 className="size-5 animate-spin" />
+              ) : (
+                <button
+                  className="link link-primary link-hover"
+                  onClick={handleResendVerificationCode}
+                >
+                  resend
+                </button>
+              )}
+            </p>
           </div>
         </div>
 
