@@ -48,6 +48,28 @@ export const signup = createAsyncThunk(
   }
 );
 
+// AsyncThunk for user verify email
+export const verifyEmail = createAsyncThunk(
+  "auth/verifiy-email",
+  async (
+    {
+      email,
+      token
+    }: { email : string; token : string; },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/verify-email`, {
+       email,
+       token
+      });
+      const {  message } = response.data;
+      return { message };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Email verification failed");
+    }
+  }
+);
 
 
 const authSlice = createSlice({
