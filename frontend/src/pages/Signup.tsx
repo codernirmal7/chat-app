@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, replace, useNavigate } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { BiLock, BiMessageSquare, BiUser } from "react-icons/bi";
 import { BsEye } from "react-icons/bs";
@@ -33,6 +33,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const validateForm = (): boolean => {
     const { fullName, email, password, confirmPassword } = formData;
@@ -93,12 +94,6 @@ const Signup = () => {
       toast.success(result.message);
 
       // Reset form and errors after successful signup
-      setFormData({
-        fullName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
       setErrors({
         fullName: "",
         email: "",
@@ -107,6 +102,21 @@ const Signup = () => {
       });
       setIsLoading(false);
       setResponseMessage({ errors: false, message: result.message });
+      
+      sessionStorage.setItem("fromRedirect", "true");
+
+      // Redirect to verify email page after successful signup
+      setTimeout(() => {
+        navigate(`verify/${formData.email}`,{replace : true});
+      },1000)
+
+      setFormData({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+
     } catch (err: any) {
       setIsLoading(false);
       setResponseMessage({

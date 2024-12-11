@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { CiMail } from "react-icons/ci";
 import { TbLoader2 } from "react-icons/tb";
@@ -32,6 +32,15 @@ export const VerifyEmail = () => {
   });
 
   const navigate = useNavigate();
+  const fromRedirect = sessionStorage.getItem("fromRedirect");
+
+  useEffect(() => {
+    if (!fromRedirect) {
+      navigate("/");
+    } else {
+      sessionStorage.removeItem("fromRedirect");
+    }
+  }, []);
 
   const validateForm = (): boolean => {
     const { verificationCode } = formData;
