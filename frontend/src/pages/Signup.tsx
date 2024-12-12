@@ -136,7 +136,7 @@ const Signup = () => {
                 className="size-12 rounded-xl bg-primary/10 flex items-center justify-center 
               group-hover:bg-primary/20 transition-colors"
               >
-                <BiMessageSquare className="size-6 text-primary" />
+                <BiMessageSquare className="size-6 text-primary animate-bounce" />
               </div>
               <h1 className="text-2xl font-bold mt-2">Create Account</h1>
               <p className="text-base-content/60">
