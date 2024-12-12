@@ -1,4 +1,4 @@
-import  { FormEvent, useState } from "react";
+import { FormEvent, useState } from "react";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { Link, useNavigate } from "react-router-dom";
 import { TbLoader2 } from "react-icons/tb";
@@ -69,7 +69,6 @@ export const Signin = () => {
 
     setResponseMessage({ errors: false, message: "" });
 
-
     try {
       setIsLoggingIn(true);
 
@@ -92,12 +91,15 @@ export const Signin = () => {
       setTimeout(() => {
         navigate("/", { replace: true });
       }, 1000);
-
     } catch (error: any) {
       setIsLoggingIn(false);
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred";
       setResponseMessage({
         errors: true,
-        message: error,
+        message: errorMessage,
       });
     }
   };
@@ -121,15 +123,13 @@ export const Signin = () => {
               </div>
             </div>
 
-            {
-            responseMessage.errors && (
+            {responseMessage.errors && (
               <div className="w-full flex items-center justify-center text-center">
-            <span className="w-full text-error border border-error/30 rounded-lg p-3">
-              {responseMessage.message}
-            </span>
-          </div>
-            )
-          }
+                <span className="w-full text-error border border-error/30 rounded-lg p-3">
+                  {responseMessage.message}
+                </span>
+              </div>
+            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -150,6 +150,10 @@ export const Signin = () => {
                     value={formData.identifier}
                     onChange={(e) =>
                       handleInputChange("identifier", e.target.value)
+                    }
+                    aria-invalid={!!errors.identifier}
+                    aria-describedby={
+                      errors.identifier ? "identifier-error" : undefined
                     }
                   />
                 </div>
@@ -177,6 +181,10 @@ export const Signin = () => {
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
+                    }
+                    aria-invalid={!!errors.password}
+                    aria-describedby={
+                      errors.password ? "password-error" : undefined
                     }
                   />
                   <button
@@ -206,7 +214,7 @@ export const Signin = () => {
                 {isLoggingIn ? (
                   <>
                     <TbLoader2 className="h-5 w-5 animate-spin" />
-                    Loading...
+                    Sign in...
                   </>
                 ) : (
                   "Sign in"

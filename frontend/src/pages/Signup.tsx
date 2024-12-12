@@ -30,7 +30,7 @@ const Signup = () => {
     message: "",
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSignupLoading, setIsSignupLoading] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -66,10 +66,7 @@ const Signup = () => {
     return Object.values(newErrors).every((error) => error === "");
   };
 
-  const handleInputChange = (
-    field: string,
-    value: string
-  ) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: value,
@@ -83,13 +80,11 @@ const Signup = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    
     if (!validateForm()) return;
     setResponseMessage({ errors: false, message: "" });
 
-
     try {
-      setIsLoading(true);
+      setIsSignupLoading(true);
       const result = await dispatch(signup(formData)).unwrap();
       toast.success(result.message);
 
@@ -100,15 +95,15 @@ const Signup = () => {
         password: "",
         confirmPassword: "",
       });
-      setIsLoading(false);
+      setIsSignupLoading(false);
       setResponseMessage({ errors: false, message: result.message });
-      
+
       sessionStorage.setItem("fromRedirect", "true");
 
       // Redirect to verify email page after successful signup
       setTimeout(() => {
-        navigate(`verify/${formData.email}`,{replace : true});
-      },1000)
+        navigate(`verify/${formData.email}`, { replace: true });
+      }, 1000);
 
       setFormData({
         fullName: "",
@@ -116,12 +111,15 @@ const Signup = () => {
         password: "",
         confirmPassword: "",
       });
-
-    } catch (err: any) {
-      setIsLoading(false);
+    } catch (error: any) {
+      setIsSignupLoading(false);
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred";
       setResponseMessage({
         errors: true,
-        message: err,
+        message: errorMessage,
       });
     }
   };
@@ -146,15 +144,13 @@ const Signup = () => {
               </p>
             </div>
           </div>
-          {
-            responseMessage.errors && (
-              <div className="w-full flex items-center justify-center text-center">
-            <span className="w-full text-error border border-error/30 rounded-lg p-3">
-              {responseMessage.message}
-            </span>
-          </div>
-            )
-          }
+          {responseMessage.errors && (
+            <div className="w-full flex items-center justify-center text-center">
+              <span className="w-full text-error border border-error/30 rounded-lg p-3">
+                {responseMessage.message}
+              </span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div className="form-control">
@@ -201,6 +197,8 @@ const Signup = () => {
                   placeholder="you@example.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                 />
               </div>
               {errors.email && (
@@ -227,6 +225,8 @@ const Signup = () => {
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
                 />
                 <button
                   type="button"
@@ -266,6 +266,8 @@ const Signup = () => {
                   onChange={(e) =>
                     handleInputChange("confirmPassword", e.target.value)
                   }
+                  aria-invalid={!!errors.confirmPassword}
+                  aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
                 />
               </div>
               {errors.confirmPassword && (
@@ -278,12 +280,12 @@ const Signup = () => {
             <button
               type="submit"
               className="btn btn-primary w-full"
-              disabled={isLoading}
+              disabled={isSignupLoading}
             >
-              {isLoading ? (
+              {isSignupLoading ? (
                 <>
                   <TbLoader2 className="size-5 animate-spin" />
-                  Loading...
+                  Sign up...
                 </>
               ) : (
                 <span className="font-circular-web">Sign up</span>

@@ -23,9 +23,10 @@ export const VerifyEmail = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isVerificationSendingLoading, setIsVerificationSendingLoading] =
+    useState(false);
 
-  const [isLoading2, setIsLoading2] = useState(false);
+  const [isResendingEmailLoading, setIsResendingEmailLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     verificationCode: "",
@@ -73,7 +74,7 @@ export const VerifyEmail = () => {
     if (!validateForm()) return;
     setResponseMessage({ errors: false, message: "" });
     try {
-      setIsLoading(true);
+      setIsVerificationSendingLoading(true);
       // send verification code to backend
       const result = await dispatch(
         verifyEmail({
@@ -83,8 +84,8 @@ export const VerifyEmail = () => {
       ).unwrap();
       toast.success(result.message);
 
-      // if success then navigate to login page and reset form
-      setIsLoading(false);
+      // If success then navigate to sign in page and reset form
+      setIsVerificationSendingLoading(false);
 
       setFormData({
         verificationCode: "",
@@ -94,7 +95,7 @@ export const VerifyEmail = () => {
         navigate("/signin", { replace: true });
       }, 1000);
     } catch (error: any) {
-      setIsLoading(false);
+      setIsVerificationSendingLoading(false);
       setResponseMessage({
         errors: true,
         message: error,
@@ -105,7 +106,7 @@ export const VerifyEmail = () => {
   const handleResendVerificationCode = async () => {
     setResponseMessage({ errors: false, message: "" });
     try {
-      setIsLoading2(true);
+      setIsResendingEmailLoading(true);
       // send verification code to backend
       const result = await dispatch(
         resendVerificationCodeEmail({
@@ -115,12 +116,16 @@ export const VerifyEmail = () => {
 
       toast.success(result.message);
 
-      setIsLoading2(false);
+      setIsResendingEmailLoading(false);
     } catch (error: any) {
-      setIsLoading2(false);
+      setIsResendingEmailLoading(false);
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred";
       setResponseMessage({
         errors: true,
-        message: error,
+        message: errorMessage,
       });
     }
   };
@@ -171,6 +176,12 @@ export const VerifyEmail = () => {
                       onChange={(e) =>
                         handleInputChange("verificationCode", e.target.value)
                       }
+                      aria-invalid={!!errors.verificationCode}
+                      aria-describedby={
+                        errors.verificationCode
+                          ? "verificationCode-error"
+                          : undefined
+                      }
                     />
                   </div>
                   {errors.verificationCode && (
@@ -182,12 +193,12 @@ export const VerifyEmail = () => {
                 <button
                   type="submit"
                   className="btn btn-primary w-full"
-                  disabled={isLoading}
+                  disabled={isVerificationSendingLoading}
                 >
-                  {isLoading ? (
+                  {isVerificationSendingLoading ? (
                     <>
                       <TbLoader2 className="size-5 animate-spin" />
-                      Loading...
+                      Verifying...
                     </>
                   ) : (
                     <span className="font-circular-web">Verify</span>
@@ -200,7 +211,7 @@ export const VerifyEmail = () => {
           <div className="text-center ">
             <p className="text-base-content/60 flex gap-2 items-center">
               Request a new code?{" "}
-              {isLoading2 ? (
+              {isResendingEmailLoading ? (
                 <TbLoader2 className="size-5 animate-spin" />
               ) : (
                 <button
