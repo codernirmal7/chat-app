@@ -92,6 +92,29 @@ export const resendVerificationCodeEmail = createAsyncThunk(
   }
 );
 
+// AsyncThunk for sign in
+export const signIn = createAsyncThunk(
+  "auth/signin",
+  async (
+    {
+      identifier,
+      password
+    }: { identifier : string; password : string; },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/signin`, {
+        identifier,
+       password
+      });
+      const {  message } = response.data;
+      return { message };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Error while sign in.");
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
