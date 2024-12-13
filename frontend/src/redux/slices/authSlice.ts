@@ -10,11 +10,13 @@ interface AuthState {
     email: string;
   } | null;
   isAuthenticated: boolean;
+  error : string | unknown;
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
+  error: null, 
 };
 
 // API base URL
@@ -109,10 +111,14 @@ export const signIn = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/signin`, {
-        identifier,
-        password,
-      },{ withCredentials: true });
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/signin`,
+        {
+          identifier,
+          password,
+        },
+        { withCredentials: true }
+      );
       const { message } = response.data;
       return { message };
     } catch (error: any) {
@@ -166,15 +172,12 @@ export const resetPassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/reset-password`,
-        {
-          email,
-          token,
-          newPassword,
-          newConfirmPassword,
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/auth/reset-password`, {
+        email,
+        token,
+        newPassword,
+        newConfirmPassword,
+      });
       const { message } = response.data;
       return { message };
     } catch (error: any) {
@@ -187,12 +190,44 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+// AsyncThunk for get user data
+export const getUserData = createAsyncThunk(
+  "auth/me",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/user/me`, {
+        withCredentials: true, 
+      });
+      const { user } = response.data;
+      return { user };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error ||
+        error?.response?.data ||
+        "Error while fetching user data."
+      );
+    }
+  }
+);
+
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder;
+    builder
+    .addCase(getUserData.fulfilled, (state, action) => {
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+    })
+    .addCase(getUserData.rejected, (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+    })
+    .addCase(getUserData.pending, (state) => {
+      state.error = null; // Clear any error while fetching
+    });
   },
 });
 

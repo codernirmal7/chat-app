@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthImagePattern from "../components/AuthImagePattern";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 import { CiMail } from "react-icons/ci";
 import { TbLoader2 } from "react-icons/tb";
 import { BiLock, BiMailSend } from "react-icons/bi";
@@ -46,6 +46,15 @@ export const ForgetPassword = () => {
   });
 
   const navigate = useNavigate();
+
+  const {isAuthenticated} = useSelector((state:RootState)=>state.auth)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
+
 
   const validateForm = (): boolean => {
     const { resetPasswordToken, email, newPassword, newConfirmPassword } =

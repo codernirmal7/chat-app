@@ -1,12 +1,22 @@
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Signup from "./pages/Signup";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import { Signin } from "./pages/Signin";
 import { ForgetPassword } from "./pages/ForgetPassword";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "./redux/store";
+import { useEffect } from "react";
+import { getUserData } from "./redux/slices/authSlice";
 
 function App() {
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(()=>{
+    dispatch(getUserData())
+  },[])
 
   return (
     <>
@@ -16,6 +26,7 @@ function App() {
       <Route path="/signin" element={<Signin/>}/>
       <Route path="/verify/:email" element={<VerifyEmail/>}/>
       <Route path="/forget-password" element={<ForgetPassword/>}/>
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
     <Toaster />
     </>

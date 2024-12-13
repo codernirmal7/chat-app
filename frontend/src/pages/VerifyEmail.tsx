@@ -3,8 +3,8 @@ import AuthImagePattern from "../components/AuthImagePattern";
 import { CiMail } from "react-icons/ci";
 import { TbLoader2 } from "react-icons/tb";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 import {
   resendVerificationCodeEmail,
   verifyEmail,
@@ -33,6 +33,15 @@ export const VerifyEmail = () => {
   });
 
   const navigate = useNavigate();
+
+  const {isAuthenticated} = useSelector((state:RootState)=>state.auth)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
+
   const fromRedirect = sessionStorage.getItem("fromRedirect");
 
   useEffect(() => {

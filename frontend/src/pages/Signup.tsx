@@ -1,12 +1,12 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { BiLock, BiMessageSquare, BiUser } from "react-icons/bi";
 import { BsEye } from "react-icons/bs";
 import { FiEyeOff } from "react-icons/fi";
 import { signup } from "../redux/slices/authSlice";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 import { TbLoader2 } from "react-icons/tb";
 import { CiMail } from "react-icons/ci";
 import toast from "react-hot-toast";
@@ -34,6 +34,15 @@ const Signup = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+
+  const {isAuthenticated} = useSelector((state:RootState)=>state.auth)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
+
 
   const validateForm = (): boolean => {
     const { fullName, email, password, confirmPassword } = formData;
