@@ -1,6 +1,11 @@
+import { useSelector } from "react-redux";
 import { ThemeController } from "./ThemeController";
+import { RootState } from "../redux/store";
+import { Link } from "react-router-dom";
+import { LogOut, User } from "lucide-react";
 
 const Navbar = () => {
+  const {isAuthenticated} = useSelector((state: RootState) => state.auth);
   return (
     <header
       className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 
@@ -20,7 +25,22 @@ const Navbar = () => {
             </a>
           </div>
 
-          <div className="flex items-center gap-2">
+         
+
+          <div className="flex items-center gap-5">
+          {isAuthenticated && (
+              <>
+                <Link to={"/profile"} className={`btn btn-sm gap-2`}>
+                  <User className="size-5" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Link>
+
+                <button className="flex gap-2 items-center" >
+                  <LogOut className="size-5" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </>
+            )}
             <ThemeController/>
           </div>
         </div>

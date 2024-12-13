@@ -6,8 +6,9 @@ interface AuthState {
     id: string;
     fullName: string;
     username: string;
-    profileImage: string;
+    avatar: string;
     email: string;
+    accountCreatedAt: string;
   } | null;
   isAuthenticated: boolean;
   error : string | unknown;
