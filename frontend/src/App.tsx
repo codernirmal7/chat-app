@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
 import { useEffect } from "react";
 import { getUserData } from "./redux/slices/authSlice";
+import Home from "./pages/Home";
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
       <Route path="/signin" element={<Signin/>}/>
       <Route path="/verify/:email" element={<VerifyEmail/>}/>
       <Route path="/forget-password" element={<ForgetPassword/>}/>
+      <Route path="/" element={<Home/>}/>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
     <Toaster />
