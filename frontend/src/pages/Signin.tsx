@@ -204,6 +204,13 @@ export const Signin = () => {
                     {errors.password}
                   </span>
                 )}
+                {!errors.password && (
+                  <div className="mt-2">
+                    <Link to="/forget-password" className="link link-primary">
+                      forget password?
+                    </Link>
+                  </div>
+                )}
               </div>
 
               <button

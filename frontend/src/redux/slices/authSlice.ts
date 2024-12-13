@@ -20,7 +20,6 @@ const initialState: AuthState = {
 // API base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-
 // AsyncThunk for user signup
 export const signup = createAsyncThunk(
   "auth/signup",
@@ -29,8 +28,13 @@ export const signup = createAsyncThunk(
       fullName,
       email,
       password,
-      confirmPassword
-    }: { fullName: string; email: string; password: string , confirmPassword : string; },
+      confirmPassword,
+    }: {
+      fullName: string;
+      email: string;
+      password: string;
+      confirmPassword: string;
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -38,12 +42,14 @@ export const signup = createAsyncThunk(
         fullName,
         email,
         password,
-        confirmPassword
+        confirmPassword,
       });
-      const {  message } = response.data;
+      const { message } = response.data;
       return { message };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Signup failed");
+      return rejectWithValue(
+        error.response?.data?.error || error?.response?.data || "Signup failed"
+      );
     }
   }
 );
@@ -52,21 +58,22 @@ export const signup = createAsyncThunk(
 export const verifyEmail = createAsyncThunk(
   "auth/verifiy-email",
   async (
-    {
-      email,
-      token
-    }: { email : string; token : string; },
+    { email, token }: { email: string; token: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/verify-email`, {
-       email,
-       token
+        email,
+        token,
       });
-      const {  message } = response.data;
+      const { message } = response.data;
       return { message };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Email verification failed");
+      return rejectWithValue(
+        error.response?.data?.error ||
+          error?.response?.data ||
+          "Email verification failed"
+      );
     }
   }
 );
@@ -74,20 +81,22 @@ export const verifyEmail = createAsyncThunk(
 // AsyncThunk for user resend verify email code
 export const resendVerificationCodeEmail = createAsyncThunk(
   "auth/resend-verification-email",
-  async (
-    {
-      email,
-    }: { email : string; },
-    { rejectWithValue }
-  ) => {
+  async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/resend-verification-email`, {
-       email,
-      });
-      const {  message } = response.data;
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/resend-verification-email`,
+        {
+          email,
+        }
+      );
+      const { message } = response.data;
       return { message };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Error while resending verification code.");
+      return rejectWithValue(
+        error.response?.data?.error ||
+          error?.response?.data ||
+          "Error while resending verification code."
+      );
     }
   }
 );
@@ -96,21 +105,84 @@ export const resendVerificationCodeEmail = createAsyncThunk(
 export const signIn = createAsyncThunk(
   "auth/signin",
   async (
-    {
-      identifier,
-      password
-    }: { identifier : string; password : string; },
+    { identifier, password }: { identifier: string; password: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/signin`, {
         identifier,
-       password
+        password,
       });
-      const {  message } = response.data;
+      const { message } = response.data;
       return { message };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || error?.response?.data || "Error while sign in.");
+      return rejectWithValue(
+        error.response?.data?.error ||
+          error?.response?.data ||
+          "Error while sign in."
+      );
+    }
+  }
+);
+
+// AsyncThunk for request password reset
+export const sendResetPasswordToken = createAsyncThunk(
+  "auth/request-password-reset",
+  async ({ email }: { email: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/request-password-reset`,
+        {
+          email,
+        }
+      );
+      const { message } = response.data;
+      return { message };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error ||
+          error?.response?.data ||
+          "Error while sending password reset token."
+      );
+    }
+  }
+);
+
+// AsyncThunk for reset password
+export const resetPassword = createAsyncThunk(
+  "auth/reset-password",
+  async (
+    {
+      email,
+      token,
+      newPassword,
+      newConfirmPassword,
+    }: {
+      email: string;
+      token: string;
+      newPassword: string;
+      newConfirmPassword: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/reset-password`,
+        {
+          email,
+          token,
+          newPassword,
+          newConfirmPassword,
+        }
+      );
+      const { message } = response.data;
+      return { message };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error ||
+          error?.response?.data ||
+          "Error while sending resetting the password."
+      );
     }
   }
 );
@@ -118,14 +190,11 @@ export const signIn = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    builder
-     
+    builder;
   },
 });
 
-export const { } = authSlice.actions;
+export const {} = authSlice.actions;
 export default authSlice.reducer;
