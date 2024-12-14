@@ -6,6 +6,7 @@ import authRouter from "./rotues/auth.route";
 import userRouter from "./rotues/user.route";
 import { app , server } from "./socket.io/socket";
 import express from "express";
+import messageRouter from "./rotues/message.route";
 
 const PORT = process.env.PORT || 5347; // Set 5347 as default when no port is defined
 
@@ -23,6 +24,7 @@ app.use(express.static("public"));
 //routes
 app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
+app.use("/api/messages", messageRouter)
 
 connectToDB(process.env.MONGODB_CONNECTION_URI as string)
   .then(() => {
@@ -33,4 +35,3 @@ connectToDB(process.env.MONGODB_CONNECTION_URI as string)
   .catch((error) => {
     console.error(error);
   });
-  

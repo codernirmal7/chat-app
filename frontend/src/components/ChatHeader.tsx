@@ -1,8 +1,15 @@
 import { X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
+import { getOnlineUsers } from "../socket/socket";
+import { setSelectedUser } from "../redux/slices/messageSlice";
 
 
 const ChatHeader = () => {
 
+  const { selectedUser } = useSelector((state : RootState)=> state.message);
+  const dispatch = useDispatch<AppDispatch>()
+  const onlineUsers = getOnlineUsers()
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -11,21 +18,21 @@ const ChatHeader = () => {
           {/* Avatar */}
           <div className="avatar">
             <div className="size-10 rounded-full relative">
-              <img src="/avatar.png" alt={"avatar"} />
+              <img src={selectedUser?.avatar} alt={selectedUser?.fullName} />
             </div>
           </div>
 
-          {/* User info */}
-          <div>
-            <h3 className="font-medium">Nirmal bam</h3>
+         {/* User info */}
+         <div>
+            <h3 className="font-medium">{selectedUser?.fullName}</h3>
             <p className="text-sm text-base-content/70">
-              Online
+              {onlineUsers.includes(selectedUser?._id) ? "Online" : "Offline"}
             </p>
           </div>
         </div>
 
         {/* Close button */}
-        <button>
+        <button onClick={() => dispatch(setSelectedUser(null))}>
           <X />
         </button>
       </div>
