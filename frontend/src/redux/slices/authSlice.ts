@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { disconnectSocket } from "../../socket/socket";
 
 interface AuthState {
   user: {
-    id: string;
+    userId: string;
     fullName: string;
     username: string;
     avatar: string;
@@ -193,7 +194,7 @@ export const resetPassword = createAsyncThunk(
 
 // AsyncThunk for get user data
 export const getUserData = createAsyncThunk(
-  "auth/me",
+  "user/me",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/user/me`, {
@@ -206,6 +207,25 @@ export const getUserData = createAsyncThunk(
         error.response?.data?.error ||
         error?.response?.data ||
         "Error while fetching user data."
+      );
+    }
+  }
+);
+
+// AsyncThunk for logout
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/auth/logout`, {
+        withCredentials: true, 
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error ||
+        error?.response?.data ||
+        "Error while logging out."
       );
     }
   }
@@ -228,9 +248,12 @@ const authSlice = createSlice({
     })
     .addCase(getUserData.pending, (state) => {
       state.error = null; // Clear any error while fetching
-    });
+    })
+    .addCase(logout.fulfilled, () => {
+      // Disconnect the socket on logout
+      disconnectSocket();
+    })
   },
 });
 
-export const {} = authSlice.actions;
 export default authSlice.reducer;

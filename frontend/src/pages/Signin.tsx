@@ -9,7 +9,7 @@ import { FiEyeOff } from "react-icons/fi";
 import { BsEye } from "react-icons/bs";
 import { AppDispatch, RootState } from "../redux/store";
 import { useDispatch, useSelector } from "react-redux";
-import { signIn } from "../redux/slices/authSlice";
+import { getUserData, signIn } from "../redux/slices/authSlice";
 import toast from "react-hot-toast";
 
 export const Signin = () => {
@@ -96,6 +96,8 @@ export const Signin = () => {
         identifier: "",
         password: "",
       });
+
+      await dispatch(getUserData()).unwrap()
 
       // Redirect to home page after successful signin
       setTimeout(() => {

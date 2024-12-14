@@ -1,11 +1,30 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ThemeController } from "./ThemeController";
-import { RootState } from "../redux/store";
-import { Link } from "react-router-dom";
+import { AppDispatch, RootState } from "../redux/store";
+import { Link, useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
+import { getUserData, logout } from "../redux/slices/authSlice";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const {isAuthenticated} = useSelector((state: RootState) => state.auth);
+
+  const navigate = useNavigate();
+
+  const handleLogout = async() => {
+    try {
+     await dispatch(logout()).unwrap();
+     toast.success("Logout successfully");
+     setTimeout(() => {
+      navigate("/signin");
+     },1000)
+     await dispatch(getUserData()).unwrap();
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <header
       className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 
@@ -35,7 +54,7 @@ const Navbar = () => {
                   <span className="hidden sm:inline">Profile</span>
                 </Link>
 
-                <button className="flex gap-2 items-center" >
+                <button className="flex gap-2 items-center"onClick={handleLogout} >
                   <LogOut className="size-5" />
                   <span className="hidden sm:inline">Logout</span>
                 </button>
