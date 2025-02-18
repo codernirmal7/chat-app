@@ -20,7 +20,6 @@ const ChatContainer = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const messageEndRef = useRef<HTMLDivElement | null>(null); // For scrolling
 
-  console.log(messages);
 
   useEffect(() => {
     if (selectedUser?._id) {
@@ -31,7 +30,7 @@ const ChatContainer = () => {
     return () => {
       dispatch(unsubscribeFromMessages());
     };
-  }, [selectedUser?._id, dispatch]);
+  }, [selectedUser?._id, dispatch ]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {

@@ -107,11 +107,10 @@ const Signup = () => {
       setIsSignupLoading(false);
       setResponseMessage({ errors: false, message: result.message });
 
-      sessionStorage.setItem("fromRedirect", "true");
 
       // Redirect to verify email page after successful signup
       setTimeout(() => {
-        navigate(`verify/${formData.email}`, { replace: true });
+        navigate(`/verify/${formData.email}`, { replace: true });
       }, 1000);
 
       setFormData({

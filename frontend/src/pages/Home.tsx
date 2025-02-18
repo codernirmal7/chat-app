@@ -6,10 +6,18 @@ import ChatContainer from "../components/ChatContainer";
 import Sidebar from "../components/Sidebar";
 import { RootState } from "../redux/store";
 import NoChatSelected from "../components/NoChatSelected";
+import { useEffect } from "react";
 
 const Home = () => {
 
   const {selectedUser} = useSelector((state : RootState)=> state.message)
+  const {isAuthenticated} = useSelector((state : RootState)=> state.auth)
+
+  useEffect(() => {
+    if(!isAuthenticated){
+      window.location.href = "/signin"
+    }
+  }, []);
 
   return (
     <div className="h-screen bg-base-200">

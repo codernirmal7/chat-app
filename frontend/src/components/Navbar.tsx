@@ -47,7 +47,7 @@ const Navbar = () => {
          
 
           <div className="flex items-center gap-5">
-          {isAuthenticated && (
+          {isAuthenticated ? (
               <>
                 <Link to={"/profile"} className={`btn btn-sm gap-2`}>
                   <User className="size-5" />
@@ -59,7 +59,16 @@ const Navbar = () => {
                   <span className="hidden sm:inline">Logout</span>
                 </button>
               </>
-            )}
+            )
+            :
+            (
+              <Link to="/signin" className={`btn btn-sm gap-2`}>
+                <LogOut className="size-5" />
+                <span className="hidden sm:inline">Login</span>
+              </Link>
+            )
+          
+          }
             <ThemeController/>
           </div>
         </div>

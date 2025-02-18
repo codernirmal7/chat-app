@@ -42,16 +42,7 @@ export const VerifyEmail = () => {
     }
   }, [isAuthenticated]);
 
-  const fromRedirect = sessionStorage.getItem("fromRedirect");
-
-  useEffect(() => {
-    if (!fromRedirect) {
-      navigate("/");
-    } else {
-      sessionStorage.removeItem("fromRedirect");
-    }
-  }, []);
-
+ 
   const validateForm = (): boolean => {
     const { verificationCode } = formData;
     const newErrors = {

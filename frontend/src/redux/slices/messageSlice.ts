@@ -173,7 +173,7 @@ const messageSlice = createSlice({
           state.messages.push(action.payload);
         }
       )
-      .addCase(sendMessage.rejected, (state, action: PayloadAction<string>) => {
+      .addCase(sendMessage.rejected, (_, action: PayloadAction<string>) => {
         toast.error(action.payload);
       });
   },

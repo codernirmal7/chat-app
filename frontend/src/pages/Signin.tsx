@@ -32,15 +32,13 @@ export const Signin = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const {isAuthenticated} = useSelector((state:RootState)=>state.auth)
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
     }
   }, [isAuthenticated]);
-
-
 
   const validateForm = (): boolean => {
     const { identifier, password } = formData;
@@ -97,7 +95,7 @@ export const Signin = () => {
         password: "",
       });
 
-      await dispatch(getUserData()).unwrap()
+      await dispatch(getUserData()).unwrap();
 
       // Redirect to home page after successful signin
       setTimeout(() => {
@@ -109,6 +107,14 @@ export const Signin = () => {
         typeof error === "string"
           ? error
           : error?.message || "An error occurred";
+      if (
+        errorMessage ==
+        "Please verify your email before logging in. Verification code has been sent."
+      ) {
+        setTimeout(() => {
+          navigate(`/verify/${formData.identifier}`, { replace: true });
+        }, 1000);
+      }
       setResponseMessage({
         errors: true,
         message: errorMessage,
