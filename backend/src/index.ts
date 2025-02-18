@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["https://figures-chat.netlify.app/"],
+    origin: "*",
     credentials: true,
   })
 );
