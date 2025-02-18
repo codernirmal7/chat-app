@@ -7,7 +7,7 @@ let onlineUsers: string[] = [];
 export const connectSocket = (userId : string): Socket => {
   if (!socket) {
 
-    socket = io(import.meta.env.VITE_SOCKET_BASE_URL, {
+    socket = io("https://chat-app-7a1f.onrender.com", {
       withCredentials: true,
       query: {
         userId: userId || "",

@@ -22,7 +22,7 @@ const initialState: AuthState = {
 };
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://chat-app-7a1f.onrender.com/api";
 
 // AsyncThunk for user signup
 export const signup = createAsyncThunk(

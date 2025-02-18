@@ -40,7 +40,7 @@ const initialState = {
 } as MessageState;
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://chat-app-7a1f.onrender.com/api";
 
 // Async thunk for fetching users
 export const getUsers = createAsyncThunk<User[], void, { rejectValue: any }>(

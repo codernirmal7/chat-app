@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://chat-app-7a1f.onrender.com/api";
 
 // AsyncThunk for update-profile
 export const updateProfile = createAsyncThunk(

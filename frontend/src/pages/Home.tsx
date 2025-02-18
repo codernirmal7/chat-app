@@ -7,15 +7,18 @@ import Sidebar from "../components/Sidebar";
 import { RootState } from "../redux/store";
 import NoChatSelected from "../components/NoChatSelected";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
 
   const {selectedUser} = useSelector((state : RootState)=> state.message)
   const {isAuthenticated} = useSelector((state : RootState)=> state.auth)
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if(!isAuthenticated){
-      window.location.href = "/signin"
+      navigate("/signin" ,{replace : true} )
     }
   }, []);
 
