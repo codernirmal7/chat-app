@@ -5,12 +5,12 @@ import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { AppDispatch, RootState } from "../redux/store";
 import { useEffect, useRef } from "react";
 import {
+  addMessage,
   getMessages,
-  subscribeToMessages,
-  unsubscribeFromMessages,
 } from "../redux/slices/messageSlice";
+import { getSocket } from "../socket/socket";
 
-const ChatContainer = () => {
+const ChatContainer = ({ setOpenSidebar }: { setOpenSidebar?: any }) => {
   const { messages, isMessagesLoading, selectedUser } = useSelector(
     (state: RootState) => state.message
   );
@@ -20,17 +20,31 @@ const ChatContainer = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const messageEndRef = useRef<HTMLDivElement | null>(null); // For scrolling
 
-
   useEffect(() => {
     if (selectedUser?._id) {
       dispatch(getMessages(selectedUser._id));
-      dispatch(subscribeToMessages());
     }
 
-    return () => {
-      dispatch(unsubscribeFromMessages());
+   
+  }, [selectedUser?._id, dispatch]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleReceiveMessage = (data: any) => {
+      // Here, data is already a complete message object
+      console.log("Received message:", data);
+      dispatch(addMessage(data));
     };
-  }, [selectedUser?._id, dispatch ]);
+
+    socket.on("receiveMessage", handleReceiveMessage);
+
+    return () => {
+      socket.off("receiveMessage", handleReceiveMessage);
+    };
+  }, [dispatch]);
+
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -41,7 +55,7 @@ const ChatContainer = () => {
   if (isMessagesLoading) {
     return (
       <div className="flex-1 flex flex-col overflow-auto">
-        <ChatHeader />
+        <ChatHeader setOpenSidebar={setOpenSidebar}/>
         <MessageSkeleton />
         <MessageInput />
       </div>
@@ -50,12 +64,12 @@ const ChatContainer = () => {
 
   return (
     <div className="flex-1 flex flex-col overflow-auto">
-      <ChatHeader />
+      <ChatHeader setOpenSidebar={setOpenSidebar}/>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages?.map((message) => (
+        {messages?.map((message , i) => (
           <div
-            key={message._id}
+            key={i}
             className={`chat ${
               message.senderId === user?.userId ? "chat-end" : "chat-start"
             }`}

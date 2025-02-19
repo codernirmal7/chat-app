@@ -5,16 +5,16 @@ import { getReceiverSocketId, io } from "../socket.io/socket";
 import User from "../models/User.model";
 import { deleteLocalFile } from "../utils/deleteLocalFile";
 
-export const getUsersForSidebar = async (req : Request, res : Response) => {
+export const getUsersForSidebar = async (req: Request, res: Response) => {
   try {
     const loggedInUserId = req.userData?.userId;
     const filteredUsers = await User.find({
       _id: { $ne: loggedInUserId },
-    })
+    });
 
     res.status(200).json(filteredUsers);
-  } catch (error : any) {
-    res.status(500).json({ success : false, error: "Internal server error" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
 
@@ -42,20 +42,19 @@ export const sendMessage = async (req: Request, res: Response) => {
     const { id: receiverId } = req.params;
     const senderId = req.userData?.userId;
 
-    let imageUrl;
+    let fileUrl;
     if (req.file) {
-      // Upload image to Cloudinary
+      // Upload file to Cloudinary
       const uploadResponseUrl = await uploadToCloudinary(req.file.path);
-      imageUrl = uploadResponseUrl;
+      fileUrl = uploadResponseUrl;
+      console.log(uploadResponseUrl);
     }
-
-    console.log(imageUrl)
 
     const newMessage = new Message({
       senderId,
       receiverId,
       text,
-      image: imageUrl,
+      image: fileUrl,
     });
 
     await newMessage.save();

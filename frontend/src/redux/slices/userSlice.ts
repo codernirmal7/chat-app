@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_BASE_URL = "https://chat-app-7a1f.onrender.com/api";
 
 // AsyncThunk for update-profile
 export const updateProfile = createAsyncThunk(
@@ -17,7 +16,7 @@ export const updateProfile = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/user/update-profile`, {
+      const response = await axios.post(`/api/user/update-profile`, {
         fullName,
         username,
       },
@@ -39,7 +38,7 @@ export const updateProfile = createAsyncThunk(
 
 // AsyncThunk for update-profile-image
 export const updateProfileImage = createAsyncThunk(
-  "user/update-profile-image",
+  "/api/user/update-profile-image",
   async ({ avatar }: { avatar: File }, { rejectWithValue }) => {
     try {
       // Create a FormData object to send the file
@@ -48,7 +47,7 @@ export const updateProfileImage = createAsyncThunk(
 
       // Make the request
       const response = await axios.post(
-        `${API_BASE_URL}/user/update-profile-image`,
+        `/user/update-profile-image`,
         formData,
         {
           headers: {

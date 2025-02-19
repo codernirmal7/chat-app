@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { getSocket } from "../../socket/socket";
 import { RootState } from "../store";
 
 // Define the types for the state
@@ -40,14 +39,13 @@ const initialState = {
 } as MessageState;
 
 // API base URL
-const API_BASE_URL = "https://chat-app-7a1f.onrender.com/api";
 
 // Async thunk for fetching users
 export const getUsers = createAsyncThunk<User[], void, { rejectValue: any }>(
   "messages/getUsers",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/messages/users`, {
+      const res = await axios.get(`/api/messages/users`, {
         withCredentials: true,
       });
       return res.data;
@@ -64,9 +62,9 @@ export const getMessages = createAsyncThunk<
   Message[],
   string,
   { rejectValue: any }
->("messages/getMessages", async (userId: string, { rejectWithValue }) => {
+>("/api/messages/getMessages", async (userId: string, { rejectWithValue }) => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/messages/${userId}`, {
+    const res = await axios.get(`/api/messages/${userId}`, {
       withCredentials: true,
     });
     return res.data;
@@ -92,12 +90,12 @@ export const sendMessage = createAsyncThunk<Message, any, { rejectValue: any }>(
         // Create a FormData object
         const formData = new FormData();
         formData.append("text", text.trim()); // Append the text
-        formData.append("image", image); // Append the image file
+        formData.append("image", image); // Append the file
   
         const res = await axios.post(
-          `${API_BASE_URL}/messages/send/${selectedUser._id}`,
+          `/api/messages/send/${selectedUser._id}`,
           formData, // Send the FormData directly
-          { withCredentials: true } // Ensure credentials (cookies, etc.) are included
+          { withCredentials: true } // 
         );
   
         return res.data;
@@ -117,26 +115,11 @@ const messageSlice = createSlice({
       state.selectedUser = action.payload;
     },
 
-    // Socket actions
-    subscribeToMessages: (state) => {
-      const socket = getSocket();
-      const { selectedUser } = state;
-
-      if (selectedUser) {
-        socket?.on("newMessage", (newMessage: Message) => {
-          const isMessageSentFromSelectedUser =
-            newMessage.senderId === selectedUser._id;
-          if (isMessageSentFromSelectedUser) {
-            state.messages.push(newMessage);
-          }
-        });
-      }
+    addMessage: (state, action: PayloadAction<Message>) => {
+      state.messages.push(action.payload);
     },
-
-    unsubscribeFromMessages: () => {
-      const socket = getSocket();
-      socket?.off("newMessage");
-    },
+   
+  
   },
   extraReducers: (builder) => {
     builder
@@ -167,18 +150,12 @@ const messageSlice = createSlice({
         toast.error(action.payload);
       })
 
-      .addCase(
-        sendMessage.fulfilled,
-        (state, action: PayloadAction<Message>) => {
-          state.messages.push(action.payload);
-        }
-      )
       .addCase(sendMessage.rejected, (_, action: PayloadAction<string>) => {
         toast.error(action.payload);
       });
   },
 });
 
-export const { setSelectedUser, subscribeToMessages, unsubscribeFromMessages } =
+export const { setSelectedUser, addMessage } =
   messageSlice.actions;
 export default messageSlice.reducer;

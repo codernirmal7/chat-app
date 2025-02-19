@@ -21,8 +21,6 @@ const initialState: AuthState = {
   error: null, 
 };
 
-// API base URL
-const API_BASE_URL = "https://chat-app-7a1f.onrender.com/api";
 
 // AsyncThunk for user signup
 export const signup = createAsyncThunk(
@@ -42,7 +40,7 @@ export const signup = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
+      const response = await axios.post(`/api/auth/signup`, {
         fullName,
         email,
         password,
@@ -66,7 +64,7 @@ export const verifyEmail = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/verify-email`, {
+      const response = await axios.post(`/api/auth/verify-email`, {
         email,
         token,
       });
@@ -88,7 +86,7 @@ export const resendVerificationCodeEmail = createAsyncThunk(
   async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/auth/resend-verification-email`,
+        `/api/auth/resend-verification-email`,
         {
           email,
         }
@@ -114,7 +112,7 @@ export const signIn = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/auth/signin`,
+        `/api/auth/signin`,
         {
           identifier,
           password,
@@ -139,7 +137,7 @@ export const sendResetPasswordToken = createAsyncThunk(
   async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/auth/request-password-reset`,
+        `/api/auth/request-password-reset`,
         {
           email,
         }
@@ -174,7 +172,7 @@ export const resetPassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/reset-password`, {
+      const response = await axios.post(`/api/auth/reset-password`, {
         email,
         token,
         newPassword,
@@ -197,7 +195,7 @@ export const getUserData = createAsyncThunk(
   "user/me",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/user/me`, {
+      const response = await axios.get(`/api/user/me`, {
         withCredentials: true, 
       });
       const { user } = response.data;
@@ -217,7 +215,7 @@ export const logout = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/auth/logout`, {
+      const response = await axios.get(`/api/auth/logout`, {
         withCredentials: true, 
       });
       return response.data;

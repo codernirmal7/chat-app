@@ -68,8 +68,8 @@ io.on("connection", (socket: Socket) => {
 
     // Send the message to the receiver's room
     io.to(receiverId).emit("receiveMessage", message);
-
-    console.log(`Message sent from ${senderId} to ${receiverId}`);
+    io.to(senderId).emit("receiveMessage", message);
+    console.log(`Message sent ${text}`);
   });
 
   // Handle joining a specific room
@@ -85,13 +85,19 @@ io.on("connection", (socket: Socket) => {
   });
 
   // Handle typing indicators (optional)
-  socket.on("typing", ({ senderId, receiverId }: { senderId: string; receiverId: string }) => {
-    io.to(receiverId).emit("userTyping", { senderId });
-  });
+  socket.on(
+    "typing",
+    ({ senderId, receiverId }: { senderId: string; receiverId: string }) => {
+      io.to(receiverId).emit("userTyping", { senderId });
+    }
+  );
 
-  socket.on("stopTyping", ({ senderId, receiverId }: { senderId: string; receiverId: string }) => {
-    io.to(receiverId).emit("userStoppedTyping", { senderId });
-  });
+  socket.on(
+    "stopTyping",
+    ({ senderId, receiverId }: { senderId: string; receiverId: string }) => {
+      io.to(receiverId).emit("userStoppedTyping", { senderId });
+    }
+  );
 });
 
 // Export the server and app for further use

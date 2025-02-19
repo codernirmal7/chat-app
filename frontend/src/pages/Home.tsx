@@ -6,13 +6,15 @@ import ChatContainer from "../components/ChatContainer";
 import Sidebar from "../components/Sidebar";
 import { RootState } from "../redux/store";
 import NoChatSelected from "../components/NoChatSelected";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
 
   const {selectedUser} = useSelector((state : RootState)=> state.message)
   const {isAuthenticated} = useSelector((state : RootState)=> state.auth)
+  const [openSidebar, setOpenSidebar] = useState(true);
+
 
   const navigate = useNavigate();
 
@@ -27,9 +29,9 @@ const Home = () => {
       <div className="flex h-full items-center justify-center  ">
         <div className="bg-base-100 rounded-lg shadow-cl w-full h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
-            <Sidebar />
+            <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar}/>
 
-            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+            {!selectedUser ? <NoChatSelected /> : <ChatContainer setOpenSidebar={setOpenSidebar}/>}
           </div>
         </div>
       </div>

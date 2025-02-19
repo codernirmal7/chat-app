@@ -1,16 +1,18 @@
 import React, { useRef, useState } from "react";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 import { sendMessage } from "../redux/slices/messageSlice";
 import { TbLoader2 } from "react-icons/tb";
+import { getCurrentUserId, getSocket } from "../socket/socket";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [isMessageSending , setIsMessageSending] = useState(false)
+  const [isMessageSending, setIsMessageSending] = useState(false);
+  const { selectedUser } = useSelector((state: RootState) => state.message);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -21,8 +23,9 @@ const MessageInput = () => {
       return;
     }
 
-    if (file && file.size > 5 * 1024 * 1024) {  // 5 MB limit
-      toast.error("File size should be less than 5MB");
+    if (file && file.size > 2 * 1024 * 1024) {
+      // 2 MB limit
+      toast.error("File size should be less than 2MB");
       return;
     }
 
@@ -40,33 +43,36 @@ const MessageInput = () => {
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
+
     // Avoid sending empty messages or images
     if (!text.trim() && !imagePreview) return;
-  
+
     try {
-      setIsMessageSending(true)
+      setIsMessageSending(true);
       // Get the image from the file input
       const image = fileInputRef.current?.files?.[0];
-  
-      // Dispatch sendMessage thunk
-      await dispatch(sendMessage({
+
+      await dispatch(sendMessage({ text: text.trim(), image: image })).unwrap();
+
+     
+      getSocket()?.emit("sendMessage", {
+        senderId: getCurrentUserId(), // Replace with your current user's id
+        receiverId: selectedUser?._id, // active chat holds the receiver's id
         text: text.trim(),
-        image: image, // Send image file to backend
-      })).unwrap(); // Sending FormData to backend
-  
+        image: imagePreview,
+      });
+
       // Clear form
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      setIsMessageSending(false)
+      setIsMessageSending(false);
     } catch (error) {
       toast.error("Failed to send message. Please try again.");
       console.error("Failed to send message:", error);
-      setIsMessageSending(false)
+      setIsMessageSending(false);
     }
   };
-  
 
   return (
     <div className="p-4 w-full">
@@ -125,12 +131,11 @@ const MessageInput = () => {
           disabled={!text.trim() && !imagePreview}
           aria-label="Send message"
         >
-          {
-            isMessageSending ? 
-              <TbLoader2 className="h-5 w-5 animate-spin" />
-              :
-              <Send size={22} />
-          }
+          {isMessageSending ? (
+            <TbLoader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Send size={22} />
+          )}
         </button>
       </form>
     </div>

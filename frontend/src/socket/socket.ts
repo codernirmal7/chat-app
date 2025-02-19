@@ -2,12 +2,13 @@ import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 let onlineUsers: string[] = [];
+let currentUserId: string | null = null;
 
 // Function to connect socket
 export const connectSocket = (userId : string): Socket => {
   if (!socket) {
 
-    socket = io("https://chat-app-7a1f.onrender.com", {
+    socket = io("http://localhost:4000", {
       withCredentials: true,
       query: {
         userId: userId || "",
@@ -15,7 +16,7 @@ export const connectSocket = (userId : string): Socket => {
     });
 
     socket.on("connect", () => {
-      console.log("Socket connected:", socket?.id);
+      currentUserId = userId;  // Store the current user ID
     });
 
     socket.on("getOnlineUsers", (userIds) => {
@@ -44,3 +45,4 @@ export const getSocket = (): Socket | null => socket;
 
 // Function to get the current online users
 export const getOnlineUsers = (): string[] => onlineUsers;
+export const getCurrentUserId = (): string | null => currentUserId;
