@@ -40,7 +40,7 @@ const initialState = {
 
 // API base URL
 
-const API = "https://chat-web-app-e8q5.onrender.com";
+const API = "https://chat-app-yw2o.onrender.com";
 
 
 // Async thunk for fetching users
