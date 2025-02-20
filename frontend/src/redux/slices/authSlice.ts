@@ -21,6 +21,8 @@ const initialState: AuthState = {
   error: null, 
 };
 
+const API = "https://chat-web-app-e8q5.onrender.com";
+
 
 // AsyncThunk for user signup
 export const signup = createAsyncThunk(
@@ -40,7 +42,7 @@ export const signup = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`/api/auth/signup`, {
+      const response = await axios.post(`${API}/api/auth/signup`, {
         fullName,
         email,
         password,
@@ -64,7 +66,7 @@ export const verifyEmail = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`/api/auth/verify-email`, {
+      const response = await axios.post(`${API}/api/auth/verify-email`, {
         email,
         token,
       });
@@ -86,7 +88,7 @@ export const resendVerificationCodeEmail = createAsyncThunk(
   async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `/api/auth/resend-verification-email`,
+        `${API}/api/auth/resend-verification-email`,
         {
           email,
         }
@@ -112,7 +114,7 @@ export const signIn = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `/api/auth/signin`,
+        `${API}/api/auth/signin`,
         {
           identifier,
           password,
@@ -137,7 +139,7 @@ export const sendResetPasswordToken = createAsyncThunk(
   async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `/api/auth/request-password-reset`,
+        `${API}/api/auth/request-password-reset`,
         {
           email,
         }
@@ -172,7 +174,7 @@ export const resetPassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(`/api/auth/reset-password`, {
+      const response = await axios.post(`${API}/api/auth/reset-password`, {
         email,
         token,
         newPassword,
@@ -195,7 +197,7 @@ export const getUserData = createAsyncThunk(
   "user/me",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/user/me`, {
+      const response = await axios.get(`${API}/api/user/me`, {
         withCredentials: true, 
       });
       const { user } = response.data;
@@ -215,7 +217,7 @@ export const logout = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/auth/logout`, {
+      const response = await axios.get(`${API}/api/auth/logout`, {
         withCredentials: true, 
       });
       return response.data;

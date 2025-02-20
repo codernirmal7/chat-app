@@ -40,12 +40,15 @@ const initialState = {
 
 // API base URL
 
+const API = "https://chat-web-app-e8q5.onrender.com";
+
+
 // Async thunk for fetching users
 export const getUsers = createAsyncThunk<User[], void, { rejectValue: any }>(
   "messages/getUsers",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`/api/messages/users`, {
+      const res = await axios.get(`${API}/api/messages/users`, {
         withCredentials: true,
       });
       return res.data;
@@ -64,7 +67,7 @@ export const getMessages = createAsyncThunk<
   { rejectValue: any }
 >("/api/messages/getMessages", async (userId: string, { rejectWithValue }) => {
   try {
-    const res = await axios.get(`/api/messages/${userId}`, {
+    const res = await axios.get(`${API}/api/messages/${userId}`, {
       withCredentials: true,
     });
     return res.data;
@@ -93,7 +96,7 @@ export const sendMessage = createAsyncThunk<Message, any, { rejectValue: any }>(
         formData.append("image", image); // Append the file
   
         const res = await axios.post(
-          `/api/messages/send/${selectedUser._id}`,
+          `${API}/api/messages/send/${selectedUser._id}`,
           formData, // Send the FormData directly
           { withCredentials: true } // 
         );

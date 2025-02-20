@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: "https://chat-web-app-e8q5.onrender.com",
         changeOrigin: true,
         secure: false,
       },
