@@ -8,7 +8,7 @@ let currentUserId: string | null = null;
 export const connectSocket = (userId : string): Socket => {
   if (!socket) {
 
-    socket = io("https://chat-web-app-e8q5.onrender.com", {
+    socket = io("https://209.74.87.56:443", {
       withCredentials: true,
       query: {
         userId: userId || "",

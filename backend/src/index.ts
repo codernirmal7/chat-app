@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: "https://figures-chat.netlify.app", // Explicitly allow your frontend
+    origin: "https://vite-chat.netlify.app", // Explicitly allow your frontend
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -22,7 +22,6 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(express.static("public"));
 
 //routes
 app.use("/api/auth", authRouter)

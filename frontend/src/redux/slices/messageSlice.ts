@@ -40,7 +40,8 @@ const initialState = {
 
 // API base URL
 
-const API = "https://chat-app-yw2o.onrender.com";
+const API = "https://209.74.87.56:443";
+
 
 
 // Async thunk for fetching users

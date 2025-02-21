@@ -2,7 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 
-const API = "https://chat-app-yw2o.onrender.com";
+const API = "https://209.74.87.56:443";
 
 
 // AsyncThunk for update-profile
@@ -50,7 +50,7 @@ export const updateProfileImage = createAsyncThunk(
 
       // Make the request
       const response = await axios.post(
-        `${API}/user/update-profile-image`,
+        `${API}/api/user/update-profile-image`,
         formData,
         {
           headers: {

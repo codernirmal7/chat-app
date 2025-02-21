@@ -21,7 +21,7 @@ const initialState: AuthState = {
   error: null, 
 };
 
-const API = "https://chat-app-yw2o.onrender.com";
+const API = "https://209.74.87.56:443";
 
 
 // AsyncThunk for user signup

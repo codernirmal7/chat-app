@@ -7,7 +7,8 @@ import { getCurrentUserId, getOnlineUsers, getSocket } from "../socket/socket";
 import { getUsers, setSelectedUser } from "../redux/slices/messageSlice";
 
 const Sidebar = ({ openSidebar , setOpenSidebar }: { openSidebar: boolean , setOpenSidebar : any }) => {
-  const { users, selectedUser, isUsersLoading } = useSelector((state: RootState) => state.message);
+  const { users, selectedUser, isUsersLoading, } = useSelector((state: RootState) => state.message);
+  const {isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const dispatch = useDispatch<AppDispatch>();
   // const onlineUsers = getOnlineUsers(); // Ensure this returns a valid array of online user IDs
@@ -41,7 +42,9 @@ const Sidebar = ({ openSidebar , setOpenSidebar }: { openSidebar: boolean , setO
 
   // Fetch users on component mount
   useEffect(() => {
-    dispatch(getUsers());
+    if(isAuthenticated){
+      dispatch(getUsers());
+    }
   }, [dispatch]);
 
   // Filter users based on the online-only toggle
@@ -53,7 +56,7 @@ const Sidebar = ({ openSidebar , setOpenSidebar }: { openSidebar: boolean , setO
   if (isUsersLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className={`h-full ${openSidebar ? "w-full" : "w-0 opacity-0"} z-10 bg-base-200/80 backdrop-blur-lg fixed lg:relative lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200`}>
+    <aside className={`h-full ${openSidebar ? "w-full" : "w-0 opacity-0"} lg:opacity-100 z-10 bg-base-200/80 backdrop-blur-lg fixed lg:relative lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200`}>
       <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
