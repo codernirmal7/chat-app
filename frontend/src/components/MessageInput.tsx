@@ -54,7 +54,6 @@ const MessageInput = () => {
 
       await dispatch(sendMessage({ text: text.trim(), image: image })).unwrap();
 
-     
       getSocket()?.emit("sendMessage", {
         senderId: getCurrentUserId(), // Replace with your current user's id
         receiverId: selectedUser?._id, // active chat holds the receiver's id
@@ -98,9 +97,18 @@ const MessageInput = () => {
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
+          <button
+            type="button"
+            className={`flex btn btn-circle
+                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Upload image"
+          >
+            <Image size={20} />
+          </button>
           <input
             type="text"
-            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
+            className="w-full input input-bordered rounded-lg sm:input-md"
             placeholder="Type a message..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -114,16 +122,6 @@ const MessageInput = () => {
             onChange={handleImageChange}
             aria-label="Attach an image"
           />
-
-          <button
-            type="button"
-            className={`hidden sm:flex btn btn-circle
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
-            onClick={() => fileInputRef.current?.click()}
-            aria-label="Upload image"
-          >
-            <Image size={20} />
-          </button>
         </div>
         <button
           type="submit"
