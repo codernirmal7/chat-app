@@ -2,7 +2,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 
-const API = "https://209.74.87.56:443";
+// const API = "https://api.vite-chat.me";
+const API = "http://localhost:4000";
 
 
 // AsyncThunk for update-profile

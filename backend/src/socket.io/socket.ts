@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import http from "http";
 import express from "express";
 import "dotenv/config";
+import Message from "../models/Message.model";
 
 const app = express();
 const server = http.createServer(app);
@@ -26,6 +27,7 @@ interface MessagePayload {
   receiverId: string;
   text: string;
   image?: string;
+  seen: boolean;
   createdAt?: Date;
 }
 
@@ -55,42 +57,45 @@ io.on("connection", (socket: Socket) => {
   });
 
   // Handle sending messages
-  socket.on("sendMessage", (data: MessagePayload) => {
-    const { senderId, receiverId, text, image } = data;
+  socket.on("sendMessage", async (data: MessagePayload) => {
+    const { senderId, receiverId, text, image, seen } = data;
 
     const message = {
       senderId,
       receiverId,
       text,
       image,
+      seen: false,
       createdAt: new Date(),
     };
 
     // Send the message to the receiver's room
     io.to(receiverId).emit("receiveMessage", message);
     io.to(senderId).emit("receiveMessage", message);
-    console.log(`Message sent ${text}`);
+
+    const unseenCount = await Message.countDocuments({ receiverId, seen: false });
+
+    // Emit the unseen count update for the receiver only
+    io.to(receiverId).emit("updateUnseenCount", { senderId, unseenCount });
   });
 
   // Handle joining a specific room
   socket.on("joinRoom", (roomId: string) => {
     socket.join(roomId);
-    console.log(`Socket ${socket.id} joined room: ${roomId}`);
   });
 
   // Handle leaving a specific room
   socket.on("leaveRoom", (roomId: string) => {
     socket.leave(roomId);
-    console.log(`Socket ${socket.id} left room: ${roomId}`);
   });
 
-  // Handle typing indicators (optional)
   socket.on(
     "typing",
-    ({ senderId, receiverId }: { senderId: string; receiverId: string }) => {
-      io.to(receiverId).emit("userTyping", { senderId });
+    ({ senderId, receiverId, isTyping }: { senderId: string; receiverId: string; isTyping: boolean }) => {
+      io.to(receiverId).emit("userTyping", { senderId, isTyping });
     }
   );
+  
 
   socket.on(
     "stopTyping",

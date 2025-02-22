@@ -5,6 +5,7 @@ export interface IMessage extends Document {
   receiverId: mongoose.Types.ObjectId;
   text: string;
   image: string;
+  seen : boolean;
 }
 
 const messageSchema : Schema = new Schema<IMessage>(
@@ -25,6 +26,7 @@ const messageSchema : Schema = new Schema<IMessage>(
     image: {
       type: String,
     },
+    seen: { type: Boolean, default: false }
    
   },
   { timestamps: true }

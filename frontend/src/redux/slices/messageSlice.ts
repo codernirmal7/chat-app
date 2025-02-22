@@ -40,9 +40,8 @@ const initialState = {
 
 // API base URL
 
-const API = "https://209.74.87.56:443";
-
-
+// const API = "https://api.vite-chat.me";
+const API = "http://localhost:4000";
 
 // Async thunk for fetching users
 export const getUsers = createAsyncThunk<User[], void, { rejectValue: any }>(
@@ -52,6 +51,43 @@ export const getUsers = createAsyncThunk<User[], void, { rejectValue: any }>(
       const res = await axios.get(`${API}/api/messages/users`, {
         withCredentials: true,
       });
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || "Error fetching users"
+      );
+    }
+  }
+);
+
+export const fetchUnseenMessages = createAsyncThunk(
+  "/api/messages/unseen",
+  async ({ userId }: { userId: string }, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${API}/api/messages/unseen-message/${userId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || "Error fetching users"
+      );
+    }
+  }
+);
+
+export const markMessageAsRead = createAsyncThunk(
+  "/api/messages/unseen",
+  async ({ senderId }: { senderId: string }, { rejectWithValue }) => {
+    try {
+      const res = await axios.put(
+        `${API}/api/messages/mark-seen/${senderId}`,
+        {},
+        { withCredentials: true }
+      );
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -81,34 +117,38 @@ export const getMessages = createAsyncThunk<
 
 // Async thunk for sending a message
 export const sendMessage = createAsyncThunk<Message, any, { rejectValue: any }>(
-    "messages/sendMessage",
-    async ({ text, image }: { text: string; image: File }, { rejectWithValue, getState }) => {
-      const state = getState() as RootState; // Get the state from the store
-      const { selectedUser } = state.message;
-  
-      if (!selectedUser) {
-        return rejectWithValue("No selected user to send a message to");
-      }
-  
-      try {
-        // Create a FormData object
-        const formData = new FormData();
-        formData.append("text", text.trim()); // Append the text
-        formData.append("image", image); // Append the file
-  
-        const res = await axios.post(
-          `${API}/api/messages/send/${selectedUser._id}`,
-          formData, // Send the FormData directly
-          { withCredentials: true } // 
-        );
-  
-        return res.data;
-      } catch (error: any) {
-        return rejectWithValue(error.response?.data?.error || "Error sending message");
-      }
+  "messages/sendMessage",
+  async (
+    { text, image }: { text: string; image: File },
+    { rejectWithValue, getState }
+  ) => {
+    const state = getState() as RootState; // Get the state from the store
+    const { selectedUser } = state.message;
+
+    if (!selectedUser) {
+      return rejectWithValue("No selected user to send a message to");
     }
-  );
-  
+
+    try {
+      // Create a FormData object
+      const formData = new FormData();
+      formData.append("text", text.trim()); // Append the text
+      formData.append("image", image); // Append the file
+
+      const res = await axios.post(
+        `${API}/api/messages/send/${selectedUser._id}`,
+        formData, // Send the FormData directly
+        { withCredentials: true } //
+      );
+
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || "Error sending message"
+      );
+    }
+  }
+);
 
 // Slice for messages
 const messageSlice = createSlice({
@@ -122,8 +162,6 @@ const messageSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       state.messages.push(action.payload);
     },
-   
-  
   },
   extraReducers: (builder) => {
     builder
@@ -160,6 +198,5 @@ const messageSlice = createSlice({
   },
 });
 
-export const { setSelectedUser, addMessage } =
-  messageSlice.actions;
+export const { setSelectedUser, addMessage } = messageSlice.actions;
 export default messageSlice.reducer;

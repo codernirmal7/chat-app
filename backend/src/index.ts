@@ -15,7 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, // Explicitly allow your frontend
+    // origin: process.env.FRONTEND_URL, // Explicitly allow your frontend
+    origin: "http://localhost:5173", // Explicitly allow your frontend
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -24,7 +25,7 @@ app.use(
 
 app.use(cookieParser());
 
-app.use("/api/*",secureEndpointAccess)
+// app.use("/api/*",secureEndpointAccess)
 
 //routes
 app.use("/api/auth", authRouter)

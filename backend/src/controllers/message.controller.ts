@@ -75,3 +75,49 @@ export const sendMessage = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
+
+export const markMessageAsRead = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { receiverId } = req.params; // receiverId is actually the sender of the unread messages
+    const userId = req.userData?.userId; // The logged-in user (receiver)
+
+
+    const updatedMessages = await Message.updateMany(
+      { senderId: receiverId, receiverId: userId, seen: false }, // Corrected filter
+      { $set: { seen: true } }
+    );
+
+    if (updatedMessages.modifiedCount === 0) {
+      res.status(404).json({ success: false, error: "No messages found to update" });
+      return;
+    }
+
+    const unseenCount = await Message.countDocuments({ receiverId: userId, seen: false });
+    io.to(userId).emit("updateUnseenCount", { senderId: receiverId, unseenCount });
+
+
+    res.status(200).json({ success: true, message: "Messages marked as seen" });
+  } catch (error: any) {
+    console.error("Error marking messages as read:", error.message);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+
+
+export const unseenMessageCount = async (req: Request, res: Response) : Promise<void> => {
+
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+       res.status(400).json({ success: false, error: "User ID is required" });
+       return;
+    }
+
+    const count = await Message.countDocuments({ receiverId: userId, seen: false });
+    res.status(200).json({ success: true, count });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};

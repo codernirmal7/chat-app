@@ -8,7 +8,7 @@ let currentUserId: string | null = null;
 export const connectSocket = (userId : string): Socket => {
   if (!socket) {
 
-    socket = io("https://209.74.87.56:443", {
+    socket = io("http://localhost:4000", {
       withCredentials: true,
       query: {
         userId: userId || "",

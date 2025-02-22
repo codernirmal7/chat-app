@@ -3,7 +3,7 @@ import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { sendMessage } from "../redux/slices/messageSlice";
+import { markMessageAsRead, sendMessage } from "../redux/slices/messageSlice";
 import { TbLoader2 } from "react-icons/tb";
 import { getCurrentUserId, getSocket } from "../socket/socket";
 
